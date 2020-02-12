@@ -123,9 +123,7 @@ public class DayPickerView extends RecyclerView {
     public void setMinDay(Calendar minDay){
         mAdapter.setMinDay(minDay);
     }
-    public void setTrainDay(Calendar trainDay){
-        mAdapter.setTrainDay(trainDay);
-    }
+
     public void setSingle(boolean isSingle){
         mAdapter.setSingle(isSingle);
     }

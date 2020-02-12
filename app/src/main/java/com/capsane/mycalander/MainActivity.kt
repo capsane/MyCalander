@@ -2,6 +2,7 @@ package com.capsane.mycalander
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.*
 
 class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickListener {
@@ -41,13 +43,20 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
 
 
         mDayPickerView?.setSingle(true)
-        // 设置最小可选日期
-        val minDay = "2020-2-8"
+        // 设置最小可选日期为当天0点
+        val minDay = "2020-2-13"
         if (!TextUtils.isEmpty(minDay)) {
             val calender = Calendar.getInstance()
+
+            // 也可以设置为明天的0点
+//            calender.add(Calendar.DATE, 1)
+//            calendar.set(Calendar.HOUR_OF_DAY, 0)
+//            calendar.set(Calendar.MINUTE, 0)
+//            calendar.set(Calendar.SECOND, 0)
+//            calendar.set(Calendar.MILLISECOND, 0)
+
             try {
-//                calender.add(Calendar.DATE, 1)
-//                calender.timeInMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(minDay).time
+                calender.timeInMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(minDay).time
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
@@ -80,6 +89,7 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
     }
 
     override fun getMaxYear(): Int {
+        // TODO: 根据
         return Calendar.getInstance().get(Calendar.YEAR) + 1
     }
 

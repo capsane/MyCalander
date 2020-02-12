@@ -46,6 +46,9 @@ import java.util.Locale;
 
 public class SimpleMonthView extends View {
 
+    // TODO: 1、maxYear和lastMonth的协作
+    //  2、lastDay的设置
+
     public static final String VIEW_PARAMS_HEIGHT = "height";
     public static final String VIEW_PARAMS_MONTH = "month";
     public static final String VIEW_PARAMS_YEAR = "year";
@@ -87,9 +90,10 @@ public class SimpleMonthView extends View {
 
     private final StringBuilder mStringBuilder;
 
+    protected boolean isShowTodayStr = false;   // today日期是否显示为"今天"
     protected boolean mHasToday = false;
     protected boolean mIsPrev = false;
-    protected boolean mIsShowMonthDay = true;
+    protected boolean mIsShowMonthDay = false;   // 是否每月都显示周栏
     protected int mSelectedBeginDay = -1;
     protected int mSelectedLastDay = -1;
     protected int mSelectedBeginMonth = -1;
@@ -108,8 +112,10 @@ public class SimpleMonthView extends View {
     protected int mYear;
     protected final Time today;
     protected Calendar minDay;
+
     protected int maxYear;
     protected int lastMonth;
+    protected int lastMonthDay;
 
     private final Calendar mCalendar;
     private final Calendar mDayLabelCalendar;
@@ -133,8 +139,12 @@ public class SimpleMonthView extends View {
         mCurrentDayTextColor = typedArray.getColor(R.styleable.DayPickerView_colorCurrentDay, resources.getColor(R.color.to_day));
         mMonthTextColor = typedArray.getColor(R.styleable.DayPickerView_colorMonthName, resources.getColor(R.color.normal_day));
         mDayTextColor = typedArray.getColor(R.styleable.DayPickerView_colorDayName, resources.getColor(R.color.normal_day));
+
+        // 未选中日期文字颜色
         mDayNumColor = typedArray.getColor(R.styleable.DayPickerView_colorNormalDay, resources.getColor(R.color.normal_day));
+        // 不可选中日期文字颜色
         mPreviousDayColor = typedArray.getColor(R.styleable.DayPickerView_colorPreviousDay, resources.getColor(R.color.normal_day));
+
         mSelectedDaysColor = typedArray.getColor(R.styleable.DayPickerView_colorSelectedDayBackground, resources.getColor(R.color.selected_day_background));
         mMonthTitleBGColor = typedArray.getColor(R.styleable.DayPickerView_colorSelectedDayText, resources.getColor(R.color.selected_day_text));
         mIsShowMonthDay = typedArray.getBoolean(R.styleable.DayPickerView_showMonthDay, true);
@@ -163,6 +173,10 @@ public class SimpleMonthView extends View {
         return (dividend + (remainder > 0 ? 1 : 0));
     }
 
+    /**
+     * （可选）绘制每月顶部周日栏
+     * @param canvas
+     */
     private void drawMonthDayLabels(Canvas canvas) {
         int y = MONTH_HEADER_SIZE - (MONTH_DAY_LABEL_TEXT_SIZE / 2);
         int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
@@ -216,10 +230,13 @@ public class SimpleMonthView extends View {
     }
 
     private int findDayOffset() {
-        return (mDayOfWeekStart < mWeekStart ? (mDayOfWeekStart + mNumDays) : mDayOfWeekStart)
-                - mWeekStart;
+        return (mDayOfWeekStart < mWeekStart ? (mDayOfWeekStart + mNumDays) : mDayOfWeekStart) - mWeekStart;
     }
 
+    /**
+     * TODO: 只显示月份
+     * @return
+     */
     private String getMonthAndYearString() {
         int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_NO_MONTH_DAY;
         mStringBuilder.setLength(0);
@@ -227,6 +244,10 @@ public class SimpleMonthView extends View {
         return DateUtils.formatDateRange(getContext(), millis, millis, flags);
     }
 
+    /**
+     * 日期点击事件
+     * @param calendarDay
+     */
     private void onDayClick(SimpleMonthAdapter.CalendarDay calendarDay) {
         if (mOnDayClickListener == null) {
             return;
@@ -234,7 +255,10 @@ public class SimpleMonthView extends View {
         int year = calendarDay.year;
         int month = calendarDay.month;
         int day = calendarDay.day;
-        if (year > getMaxYear() || (year == getMaxYear() && month > getLastMonth()) || (year == getMaxYear() && month == getLastMonth() && day > today.monthDay)) {
+
+        // 兼容可选时间限制
+        int endDay = lastMonthDay <= 0 ? today.monthDay : lastMonthDay;
+        if (year > maxYear || (year == maxYear && month > lastMonth) || (year == maxYear && month == lastMonth && day > endDay)) {
             return;
         }
         if (minDay != null) {
@@ -252,9 +276,7 @@ public class SimpleMonthView extends View {
             return;
         }
         if (isPrevDayEnabled
-                || !((month == today.month)
-                && (year == today.year)
-                && day < today.monthDay)) {
+                || !((month == today.month) && (year == today.year) && day < today.monthDay)) {
             mOnDayClickListener.onDayClick(this, calendarDay);
         }
     }
@@ -283,9 +305,15 @@ public class SimpleMonthView extends View {
      * 最大年月日
      */
     private boolean nextDay(int monthDay) {
-        return ((mYear > getMaxYear())) || (mYear == getMaxYear() && mMonth > getLastMonth()) || (mYear == getMaxYear() && mMonth == getLastMonth() && monthDay > today.monthDay);
+        int endDay = lastMonthDay <= 0 ? today.monthDay : lastMonthDay;
+        return ((mYear > getMaxYear())) || (mYear == getMaxYear() && mMonth > getLastMonth())
+                || (mYear == getMaxYear() && mMonth == getLastMonth() && monthDay > endDay);
     }
 
+    /**
+     * 绘制日期
+     * @param canvas
+     */
     protected void drawMonthNums(Canvas canvas) {
         int y = (mRowHeight + MINI_DAY_NUMBER_TEXT_SIZE) / 2 - DAY_SEPARATOR_WIDTH + MONTH_HEADER_SIZE;
         int paddingDay = (mWidth - 2 * mPadding) / (2 * mNumDays);
@@ -293,7 +321,6 @@ public class SimpleMonthView extends View {
         int day = 1;
         String toDayRes = getResources().getString(R.string.today);
         while (day <= mNumCells) {
-            boolean isShowTrain = true;
             int x = paddingDay * (1 + dayOffset * 2) + mPadding;
             if ((mMonth == mSelectedBeginMonth && mSelectedBeginDay == day && mSelectedBeginYear == mYear) || (mMonth == mSelectedLastMonth && mSelectedLastDay == day && mSelectedLastYear == mYear)) {
                 if (mDrawRect) {
@@ -302,16 +329,17 @@ public class SimpleMonthView extends View {
                 } else {
                     canvas.drawCircle(x, y - MINI_DAY_NUMBER_TEXT_SIZE / 3, DAY_SELECTED_CIRCLE_SIZE, mSelectedCirclePaint);
                 }
-                isShowTrain = false;
             }
-            if (mHasToday && (mToday == day)) {
+            if (mHasToday && (mToday == day) && isShowTodayStr) {
                 mMonthNumPaint.setColor(mCurrentDayTextColor);
             } else {
+                // 设置未选中（但是可以选中）颜色
                 mMonthNumPaint.setColor(mDayNumColor);
                 mMonthNumPaint.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
             }
 
-            if ((mMonth == mSelectedBeginMonth && mSelectedBeginDay == day && mSelectedBeginYear == mYear) || (mMonth == mSelectedLastMonth && mSelectedLastDay == day && mSelectedLastYear == mYear))
+            if ((mMonth == mSelectedBeginMonth && mSelectedBeginDay == day && mSelectedBeginYear == mYear)
+                    || (mMonth == mSelectedLastMonth && mSelectedLastDay == day && mSelectedLastYear == mYear))
                 mMonthNumPaint.setColor(mMonthTitleBGColor);
 
             if ((mSelectedBeginDay != -1 && mSelectedLastDay != -1 && mSelectedBeginYear == mSelectedLastYear &&
@@ -347,11 +375,11 @@ public class SimpleMonthView extends View {
                             (mSelectedBeginYear > mSelectedLastYear && ((mMonth < mSelectedBeginMonth && mYear == mSelectedBeginYear) || (mMonth > mSelectedLastMonth && mYear == mSelectedLastYear))))) {
                 mMonthNumPaint.setColor(mSelectedDaysColor);
             }
-
+            // 设置不可选中颜色
             if ((!isPrevDayEnabled && prevDay(day, today)) || nextDay(day)) {
                 mMonthNumPaint.setColor(mPreviousDayColor);
             }
-            if (mHasToday && (mToday == day)) {
+            if (mHasToday && (mToday == day) && isShowTodayStr) {
                 canvas.drawText(toDayRes, x, y, mMonthNumPaint);
             } else {
                 canvas.drawText(String.format("%d", day), x, y, mMonthNumPaint);
@@ -520,6 +548,10 @@ public class SimpleMonthView extends View {
         mNumRows = calculateNumRows();
     }
 
+    /**
+     *
+     * @param calendar 可选中的最小日期
+     */
     public void setMinDay(Calendar calendar) {
         this.minDay = calendar;
     }
@@ -538,6 +570,10 @@ public class SimpleMonthView extends View {
 
     public void setLastMonth(int lastMonth) {
         this.lastMonth = lastMonth;
+    }
+
+    public void setLastMonthDay(int lastMonthDay) {
+        this.lastMonthDay = lastMonthDay;
     }
 
     public void setOnDayClickListener(OnDayClickListener onDayClickListener) {

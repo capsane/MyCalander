@@ -22,8 +22,8 @@ package com.capsane.mycalander;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -38,6 +38,8 @@ import java.util.HashMap;
 
 public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.ViewHolder> implements SimpleMonthView.OnDayClickListener {
 
+    // TODO: 设置可选时间间隔，确定需要绘制的月份数
+
     protected static final int MONTHS_IN_YEAR = 12;
     private final TypedArray typedArray;
     private final Context mContext;
@@ -46,22 +48,40 @@ public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.
     private final SelectedDays<CalendarDay> selectedDays;
     private final Integer firstMonth;
     private final Integer lastMonth;
+    private final Integer lastMonthDay;
+    private final Integer selectableDaysDuration;
+    private final Integer maxYear;
     private boolean isSingle;
     private Calendar minDay;
-    private Calendar trainDay;
-    private Bitmap trainMap;
 
     public SimpleMonthAdapter(Context context, DatePickerController datePickerController, TypedArray typedArray) {
         this.typedArray = typedArray;
+        mController = datePickerController;
+
         calendar = Calendar.getInstance();
         firstMonth = typedArray.getInt(R.styleable.DayPickerView_firstMonth, calendar.get(Calendar.MONTH));
-        lastMonth = typedArray.getInt(R.styleable.DayPickerView_lastMonth, (calendar.get(Calendar.MONTH)) % MONTHS_IN_YEAR);
-        isSingle = typedArray.getBoolean(R.styleable.DayPickerView_selectSingle, false);
+
+        // 设置可选时间，默认为90天
+        selectableDaysDuration = typedArray.getInt(R.styleable.DayPickerView_selectableDaysDuration, -1);
+        // 兼容根据日期设置maxYear，lastMonth
+        if (selectableDaysDuration <= 0) {
+            maxYear = mController.getMaxYear();
+            lastMonth = typedArray.getInt(R.styleable.DayPickerView_lastMonth, (calendar.get(Calendar.MONTH)) % MONTHS_IN_YEAR);
+            lastMonthDay = -1;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, selectableDaysDuration);
+            maxYear = calendar.get(Calendar.YEAR);
+            lastMonth = calendar.get(Calendar.MONTH) % MONTHS_IN_YEAR;
+            lastMonthDay = calendar.get(Calendar.DATE);
+        }
+
+        isSingle = typedArray.getBoolean(R.styleable.DayPickerView_selectSingle, true);
+
         selectedDays = new SelectedDays<>();
         mContext = context;
-        mController = datePickerController;
-        trainMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.calendar_train_blue);
-        trainMap = onScaleImage(trainMap, 0.5f);
+//        trainMap = BitmapFactory.decodeResource(context.getResources(), R.drawable.calendar_train_blue);
+//        trainMap = onScaleImage(trainMap, 0.5f);
         init();
     }
 
@@ -75,18 +95,21 @@ public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         final SimpleMonthView simpleMonthView = new SimpleMonthView(mContext, typedArray);
         simpleMonthView.setMinDay(minDay);
-        simpleMonthView.setMaxYear(mController.getMaxYear());
+//        simpleMonthView.setMaxYear(mController.getMaxYear());
+        simpleMonthView.setMaxYear(maxYear);
         simpleMonthView.setLastMonth(lastMonth);
+        simpleMonthView.setLastMonthDay(lastMonthDay);
         return new ViewHolder(simpleMonthView, this);
     }
 
+    /**
+     *
+     * @param minDay 可选中的最小日期
+     */
     public void setMinDay(Calendar minDay) {
         this.minDay = minDay;
     }
 
-    public void setTrainDay(Calendar trainDay) {
-        this.trainDay = trainDay;
-    }
 
     public void setSingle(boolean isSingle) {
         this.isSingle = isSingle;
@@ -100,7 +123,7 @@ public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         final SimpleMonthView v = viewHolder.simpleMonthView;
-        final HashMap<String, Integer> drawingParams = new HashMap<String, Integer>();
+        final HashMap<String, Integer> drawingParams = new HashMap<>();
         int month;
         int year;
 
@@ -147,7 +170,8 @@ public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.
 
     @Override
     public int getItemCount() {
-        int itemCount = (((mController.getMaxYear() - calendar.get(Calendar.YEAR)) + 1) * MONTHS_IN_YEAR);
+        int itemCount = (((maxYear - calendar.get(Calendar.YEAR)) + 1) * MONTHS_IN_YEAR);
+//        int itemCount = (((mController.getMaxYear() - calendar.get(Calendar.YEAR)) + 1) * MONTHS_IN_YEAR);
 
         if (firstMonth != -1)
             itemCount -= firstMonth;

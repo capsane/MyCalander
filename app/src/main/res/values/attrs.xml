@@ -19,6 +19,7 @@
         <attr name="drawRoundRect" format="boolean" />
         <attr name="selectSingle" format="boolean" />
         <attr name="showMonthDay" format="boolean" />
+        <attr name="selectableDaysDuration" format="integer" />
         <attr name="firstMonth" format="enum">
             <enum name="january" value="0" />
             <enum name="february" value="1" />
