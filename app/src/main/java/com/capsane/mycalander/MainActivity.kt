@@ -10,13 +10,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickListener {
 
-    private var mDayPickerView: DayPickerView? = null
     private var mGoLayout: RelativeLayout? = null
     private var mGo: TextView? = null
     private var mGoDelete: ImageView? = null
@@ -29,19 +29,17 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mDayPickerView = findViewById(R.id.day_picker)
         mGoLayout = findViewById(R.id.go_layout)
         mGo = findViewById(R.id.go)
         mGoDelete = findViewById(R.id.go_delete)
         mBackLayout = findViewById(R.id.back_layout)
         mBack = findViewById(R.id.back)
         mBackDelete = findViewById(R.id.back_delete)
-        mDayPickerView = findViewById(R.id.day_picker)
-        mDayPickerView!!.controller = this
+        day_picker?.controller = this
         mGoDelete!!.setOnClickListener(this)
         mBackDelete!!.setOnClickListener(this)
 
-        mDayPickerView?.addItemDecoration(object : RecyclerView.ItemDecoration() {
+        day_picker?.addItemDecoration(object : RecyclerView.ItemDecoration() {
             override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
                 super.getItemOffsets(outRect, view, parent, state)
                 val position = parent.getChildLayoutPosition(view)
@@ -70,11 +68,11 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
-            mDayPickerView?.setMinDay(calender)
+            day_picker?.setMinDay(calender)
         }
 
         // setSingle必须要在setMinDay之后
-        mDayPickerView?.setSingle(true)
+        day_picker?.setSingle(true)
 
     }
 
@@ -86,19 +84,19 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
     override fun onClick(p0: View?) {
         when (p0?.id) {
             R.id.go_delete -> {
-                mDayPickerView!!.selectedDays.first = null
-                mDayPickerView!!.selectedDays.setLast(null)
+                day_picker?.selectedDays?.first = null
+                day_picker?.selectedDays?.setLast(null)
             }
             R.id.back_delete -> {
-                mDayPickerView!!.selectedDays.setLast(null)
+                day_picker?.selectedDays?.setLast(null)
             }
             else -> {
             }
         }
 
         //刷新日历??
-        mDayPickerView!!.setUpAdapter()
-        onDateRangeSelected(mDayPickerView!!.selectedDays)
+        day_picker?.setupAdapter()
+        onDateRangeSelected(day_picker?.selectedDays)
     }
 
     override fun getMaxYear(): Int {
