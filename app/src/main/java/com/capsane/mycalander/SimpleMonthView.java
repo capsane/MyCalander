@@ -133,17 +133,21 @@ public class SimpleMonthView extends View {
         today = new Time(Time.getCurrentTimezone());
         today.setToNow();
         mDayOfWeekTypeface = resources.getString(R.string.sans_serif);
+        // 今天日期颜色
         mCurrentDayTextColor = typedArray.getColor(R.styleable.DayPickerView_colorCurrentDay, resources.getColor(R.color.to_day));
+        // 月份颜色
         mMonthTextColor = typedArray.getColor(R.styleable.DayPickerView_colorMonthName, resources.getColor(R.color.normal_day));
+        //
         mDayTextColor = typedArray.getColor(R.styleable.DayPickerView_colorDayName, resources.getColor(R.color.normal_day));
-
         // 未选中日期文字颜色
         mDayNumColor = typedArray.getColor(R.styleable.DayPickerView_colorNormalDay, resources.getColor(R.color.normal_day));
         // 不可选中日期文字颜色
         mPreviousDayColor = typedArray.getColor(R.styleable.DayPickerView_colorPreviousDay, resources.getColor(R.color.normal_day));
-
+        // 选中日期的背景颜色
         mSelectedDaysColor = typedArray.getColor(R.styleable.DayPickerView_colorSelectedDayBackground, resources.getColor(R.color.selected_day_background));
+        // 选中日期的文字颜色
         mMonthTitleBGColor = typedArray.getColor(R.styleable.DayPickerView_colorSelectedDayText, resources.getColor(R.color.selected_day_text));
+        // 每月是否显示周栏
         mIsShowMonthDay = typedArray.getBoolean(R.styleable.DayPickerView_showMonthDay, true);
         mDrawRect = typedArray.getBoolean(R.styleable.DayPickerView_drawRoundRect, false);
 
@@ -152,9 +156,14 @@ public class SimpleMonthView extends View {
         MINI_DAY_NUMBER_TEXT_SIZE = typedArray.getDimensionPixelSize(R.styleable.DayPickerView_textSizeDay, resources.getDimensionPixelSize(R.dimen.text_size_day));
         MONTH_LABEL_TEXT_SIZE = typedArray.getDimensionPixelSize(R.styleable.DayPickerView_textSizeMonth, resources.getDimensionPixelSize(R.dimen.text_size_month));
         MONTH_DAY_LABEL_TEXT_SIZE = typedArray.getDimensionPixelSize(R.styleable.DayPickerView_textSizeDayName, resources.getDimensionPixelSize(R.dimen.text_size_day_name));
+
+        // 年月以及周的空间高度
         MONTH_HEADER_SIZE = typedArray.getDimensionPixelOffset(R.styleable.DayPickerView_headerMonthHeight, resources.getDimensionPixelOffset(mIsShowMonthDay ? R.dimen.header_month_height_showWeek : R.dimen.header_month_height));
+
+        // 选中日期背景半径
         DAY_SELECTED_CIRCLE_SIZE = typedArray.getDimensionPixelSize(R.styleable.DayPickerView_selectedDayRadius, resources.getDimensionPixelOffset(R.dimen.selected_day_radius));
 
+        // 日期空间的高度
         mRowHeight = ((typedArray.getDimensionPixelSize(R.styleable.DayPickerView_calendarHeight, resources.getDimensionPixelOffset(R.dimen.calendar_height)) - MONTH_HEADER_SIZE) / 6);
 
         isPrevDayEnabled = typedArray.getBoolean(R.styleable.DayPickerView_enablePreviousDay, true);

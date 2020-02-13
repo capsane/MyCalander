@@ -169,6 +169,7 @@
         calendar:colorDayName="#FF00FF"
         calendar:colorMonthName="#222222"
         calendar:colorNormalDay="#000000"
+        calendar:colorSelectedDayText="#000000"
         calendar:lastMonth="january"
         calendar:colorPreviousDay="#BBBBBB"
         calendar:colorSelectedDayBackground="#FFD552"

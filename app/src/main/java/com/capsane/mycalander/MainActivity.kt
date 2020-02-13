@@ -1,17 +1,17 @@
 package com.capsane.mycalander
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 
 class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickListener {
@@ -41,8 +41,19 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
         mGoDelete!!.setOnClickListener(this)
         mBackDelete!!.setOnClickListener(this)
 
+        mDayPickerView?.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+                super.getItemOffsets(outRect, view, parent, state)
+                val position = parent.getChildLayoutPosition(view)
+                val itemCount = state.itemCount
+                if (position == itemCount - 1) {
+                    outRect.bottom = 300
+                }
+            }
+        })
+
         // 设置最小可选日期为当天0点
-        val minDay = "2020-2-13"
+        val minDay = "2020-2-14"
         if (!TextUtils.isEmpty(minDay)) {
             val calender = Calendar.getInstance()
 
@@ -54,7 +65,8 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
 //            calendar.set(Calendar.MILLISECOND, 0)
 
             try {
-                calender.timeInMillis = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(minDay).time
+                calender.timeInMillis =
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(minDay).time
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
@@ -100,7 +112,7 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
      * @param day
      */
     override fun onDayOfMonthSelected(year: Int, month: Int, day: Int) {
-        Toast.makeText(this, "$year-${month+1}-$day", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "$year-${month + 1}-$day", Toast.LENGTH_SHORT).show()
     }
 
     /**
