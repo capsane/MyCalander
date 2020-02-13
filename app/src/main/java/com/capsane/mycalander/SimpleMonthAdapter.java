@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -38,7 +37,7 @@ import java.util.HashMap;
 
 public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.ViewHolder> implements SimpleMonthView.OnDayClickListener {
 
-    // TODO: 设置可选时间间隔，确定需要绘制的月份数
+    public static final String[] MONTHS = {"一", "二", "三", "四", "五", "六", "七", "八", "九","十", "十一", "十二"};
 
     protected static final int MONTHS_IN_YEAR = 12;
     private final TypedArray typedArray;
@@ -114,7 +113,9 @@ public class SimpleMonthAdapter extends RecyclerView.Adapter<SimpleMonthAdapter.
     public void setSingle(boolean isSingle) {
         this.isSingle = isSingle;
         if (isSingle) {
-            selectedDays.setLast(new CalendarDay(System.currentTimeMillis()));
+            // 默认选中日期为minDay
+            selectedDays.setFirst(new CalendarDay(minDay.getTimeInMillis()));
+//            selectedDays.setLast(new CalendarDay(System.currentTimeMillis()));
         } else {
             selectedDays.setLast(null);
         }

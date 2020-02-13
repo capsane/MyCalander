@@ -41,8 +41,6 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
         mGoDelete!!.setOnClickListener(this)
         mBackDelete!!.setOnClickListener(this)
 
-
-        mDayPickerView?.setSingle(true)
         // 设置最小可选日期为当天0点
         val minDay = "2020-2-13"
         if (!TextUtils.isEmpty(minDay)) {
@@ -62,6 +60,9 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
             }
             mDayPickerView?.setMinDay(calender)
         }
+
+        // setSingle必须要在setMinDay之后
+        mDayPickerView?.setSingle(true)
 
     }
 
@@ -89,7 +90,6 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
     }
 
     override fun getMaxYear(): Int {
-        // TODO: 根据
         return Calendar.getInstance().get(Calendar.YEAR) + 1
     }
 

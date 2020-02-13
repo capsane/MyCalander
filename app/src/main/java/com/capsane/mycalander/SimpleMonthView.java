@@ -46,9 +46,6 @@ import java.util.Locale;
 
 public class SimpleMonthView extends View {
 
-    // TODO: 1、maxYear和lastMonth的协作
-    //  2、lastDay的设置
-
     public static final String VIEW_PARAMS_HEIGHT = "height";
     public static final String VIEW_PARAMS_MONTH = "month";
     public static final String VIEW_PARAMS_YEAR = "year";
@@ -207,7 +204,7 @@ public class SimpleMonthView extends View {
 
     /**
      * 绘制当月是哪一年的哪一月。
-     *
+     * TODO: 调整间距
      * @param canvas
      */
     private void drawMonthTitle(Canvas canvas) {
@@ -217,7 +214,7 @@ public class SimpleMonthView extends View {
         Rect rect = new Rect();
         mMonthTitlePaint.getTextBounds(text, 0, text.length(), rect);
 //        int x = (mWidth + 2 * mPadding) / 2;
-        int leftPadding = getResources().getDimensionPixelSize(R.dimen.month_day_left_padding);
+        int leftPadding = getResources().getDimensionPixelSize(R.dimen.month_title_left_padding);
         int x = rect.width() / 2 + leftPadding;
 //        int y = (MONTH_HEADER_SIZE - MONTH_DAY_LABEL_TEXT_SIZE) / 2 + (MONTH_LABEL_TEXT_SIZE / 3);
         int y = (MONTH_HEADER_SIZE - MONTH_DAY_LABEL_TEXT_SIZE) + (MONTH_LABEL_TEXT_SIZE / 4);
@@ -225,8 +222,8 @@ public class SimpleMonthView extends View {
             y = MONTH_HEADER_SIZE - MONTH_DAY_LABEL_TEXT_SIZE - (MONTH_LABEL_TEXT_SIZE * 2);
         }
         canvas.drawText(text, x, y, mMonthTitlePaint);
-        int linePadding = getResources().getDimensionPixelSize(R.dimen.month_day_line_padding);
-        canvas.drawLine(leftPadding, y + linePadding, rect.width() + leftPadding, y + linePadding, mMonthNumLinePaint);
+//        int linePadding = getResources().getDimensionPixelSize(R.dimen.month_day_line_padding);
+//        canvas.drawLine(leftPadding, y + linePadding, rect.width() + leftPadding, y + linePadding, mMonthNumLinePaint);
     }
 
     private int findDayOffset() {
@@ -234,14 +231,15 @@ public class SimpleMonthView extends View {
     }
 
     /**
-     * TODO: 只显示月份
+     * 显示年月（只有1月才显示年份）
      * @return
      */
     private String getMonthAndYearString() {
         int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_NO_MONTH_DAY;
         mStringBuilder.setLength(0);
         long millis = mCalendar.getTimeInMillis();
-        return DateUtils.formatDateRange(getContext(), millis, millis, flags);
+        int month = mCalendar.get(Calendar.MONTH);
+        return month == 0 ? DateUtils.formatDateRange(getContext(), millis, millis, flags) : SimpleMonthAdapter.MONTHS[month] + "月";
     }
 
     /**
@@ -312,6 +310,7 @@ public class SimpleMonthView extends View {
 
     /**
      * 绘制日期
+     * TODO: 调整间距
      * @param canvas
      */
     protected void drawMonthNums(Canvas canvas) {
@@ -322,11 +321,13 @@ public class SimpleMonthView extends View {
         String toDayRes = getResources().getString(R.string.today);
         while (day <= mNumCells) {
             int x = paddingDay * (1 + dayOffset * 2) + mPadding;
-            if ((mMonth == mSelectedBeginMonth && mSelectedBeginDay == day && mSelectedBeginYear == mYear) || (mMonth == mSelectedLastMonth && mSelectedLastDay == day && mSelectedLastYear == mYear)) {
+            if ((mMonth == mSelectedBeginMonth && mSelectedBeginDay == day && mSelectedBeginYear == mYear)
+                    || (mMonth == mSelectedLastMonth && mSelectedLastDay == day && mSelectedLastYear == mYear)) {
                 if (mDrawRect) {
                     RectF rectF = new RectF(x - DAY_SELECTED_CIRCLE_SIZE, (y - MINI_DAY_NUMBER_TEXT_SIZE / 3) - DAY_SELECTED_CIRCLE_SIZE, x + DAY_SELECTED_CIRCLE_SIZE, (y - MINI_DAY_NUMBER_TEXT_SIZE / 3) + DAY_SELECTED_CIRCLE_SIZE);
                     canvas.drawRoundRect(rectF, 10.0f, 10.0f, mSelectedCirclePaint);
                 } else {
+                    // TODO: 绘制选中背景
                     canvas.drawCircle(x, y - MINI_DAY_NUMBER_TEXT_SIZE / 3, DAY_SELECTED_CIRCLE_SIZE, mSelectedCirclePaint);
                 }
             }

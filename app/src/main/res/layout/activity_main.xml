@@ -163,7 +163,7 @@
     <!--日历选择页-->
     <com.capsane.mycalander.DayPickerView
         android:id="@+id/day_picker"
-        calendar:selectableDaysDuration="10"
+        calendar:selectableDaysDuration="90"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         calendar:colorDayName="#FF00FF"
