@@ -82,26 +82,13 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
     }
 
     override fun onClick(p0: View?) {
-        when (p0?.id) {
-            R.id.go_delete -> {
-                day_picker?.selectedDays?.first = null
-                day_picker?.selectedDays?.setLast(null)
-            }
-            R.id.back_delete -> {
-                day_picker?.selectedDays?.setLast(null)
-            }
-            else -> {
-            }
-        }
-
-        //刷新日历??
+        //FIXME:  每次点击刷新日历??
         day_picker?.setupAdapter()
         onDateRangeSelected(day_picker?.selectedDays)
     }
 
-    override fun getMaxYear(): Int {
-        return Calendar.getInstance().get(Calendar.YEAR) + 1
-    }
+    override val maxYear: Int
+        get() = Calendar.getInstance().get(Calendar.YEAR) + 1
 
     /**
      * 当日期发生改变每次都会调用的函数
@@ -117,7 +104,7 @@ class MainActivity : AppCompatActivity(), DatePickerController, View.OnClickList
      * 选中多个的时候触发,但是每次选中或者改变日期的时候都会触发
      * @param selectedDays
      */
-    override fun onDateRangeSelected(selectedDays: SimpleMonthAdapter.SelectedDays<SimpleMonthAdapter.CalendarDay>?) {
+    override fun onDateRangeSelected(selectedDays: SimpleMonthAdapter.SelectedDays<SimpleMonthAdapter.CalendarDay?>?) {
 
     }
 }

@@ -46,7 +46,7 @@ class DayPickerView : RecyclerView{
 
     private var scrollListener: OnScrollListener? = null
 
-    val selectedDays: SimpleMonthAdapter.SelectedDays<SimpleMonthAdapter.CalendarDay>?
+    val selectedDays: SimpleMonthAdapter.SelectedDays<SimpleMonthAdapter.CalendarDay?>?
         get() = simpleMonthAdapter?.selectedDays
 
     var controller: DatePickerController? = null
@@ -89,7 +89,7 @@ class DayPickerView : RecyclerView{
 
     fun setupAdapter() {
         if (simpleMonthAdapter == null) {
-            simpleMonthAdapter = SimpleMonthAdapter(context, controller, typedArray)
+            simpleMonthAdapter = SimpleMonthAdapter(context, controller!!, typedArray!!)
         }
         simpleMonthAdapter?.notifyDataSetChanged()
     }
